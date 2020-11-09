@@ -1,8 +1,8 @@
-const sidedata=require('./TestingScrumBoardSteps.json')
+//const sidedata=require('./TestingScrumBoardSteps.json')
 
 exports.getParamsFromJson=(async(data)=>{
     try{
-        const testsArray=sidedata.tests;
+        const testsArray=data.tests;
         const paramsArray=[]
         testsArray.forEach(async(testItem) => {
             const testCommands=testItem.commands;
