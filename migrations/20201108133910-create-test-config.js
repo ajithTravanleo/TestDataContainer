@@ -20,6 +20,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      testId:{
+        type:Sequelize.STRING,
+        allowNull: false,
+      },
       config:{
         type: Sequelize.JSONB,
         allowNull: false,

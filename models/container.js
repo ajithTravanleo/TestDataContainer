@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   container.init({
     name: DataTypes.STRING,
+    cntId:DataTypes.STRING,
     userInfo:DataTypes.JSONB
   },{
     sequelize,

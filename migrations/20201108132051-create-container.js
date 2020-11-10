@@ -1,4 +1,7 @@
 'use strict';
+
+const { sequelize } = require("../models");
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('containers', {
@@ -8,9 +11,14 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      cntId:{
+        type:Sequelize.STRING,
+        allowNull:false,
+        unique:true
+      },
       name: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
       userInfo:{
         type:Sequelize.JSONB
