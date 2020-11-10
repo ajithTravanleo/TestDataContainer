@@ -9,7 +9,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // testConfig belongsTo container
-      testConfig.belongsTo(models.container)
+      //testConfig.belongsTo(models.container)
+      testConfig.hasOne(models.testVariant,{foreignKey:'configId'})
     }
   };
   testConfig.init({

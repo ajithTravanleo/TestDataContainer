@@ -10,19 +10,15 @@ module.exports = {
       },
       configId:{
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {         // User belongsTo Company 1:1
-          model: 'testConfigs',
-          key: 'id'
-        }
+        allowNull: false
       },
       containerId:{
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {         // User belongsTo Company 1:1
-          model: 'containers',
-          key: 'id'
-        }
+         allowNull: false,
+        // references: {         // User belongsTo Company 1:1
+        //   model: 'containers',
+        //   key: 'id'
+        // }
       },
       variant: {
         type: Sequelize.JSONB

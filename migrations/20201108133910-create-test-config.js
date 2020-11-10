@@ -11,10 +11,10 @@ module.exports = {
       containerId:{
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: {         // User belongsTo Company 1:1
-          model: 'containers',
-          key: 'id'
-        }
+        // references: {         // User belongsTo Company 1:1
+        //   model: 'containers',
+        //   key: 'id'
+        // }
       },
       name: {
         type: Sequelize.STRING,

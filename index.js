@@ -4,9 +4,10 @@ const cors=require('cors')
 const PORT=process.env.port||3401
 const Utils=require('./utils/utils')
 const app=express()
+const appRouter=require('./routes/appRoute')
 app.use(cors())
 app.use(bodyParser.urlencoded({extended:false}))
-
+app.use(bodyParser.json())
 // const Container=require('./models').container
 // const TestConfig=require('./models').testConfig
 // const TestVariant=require('./models').testVariant
@@ -28,23 +29,28 @@ app.use(bodyParser.urlencoded({extended:false}))
 //       }
 //     }
 //   }).then(testConfig=>{
-//    // console.log(response)
+//     console.log(testConfig.get())
 //    testConfig.createTestVariant({
+//       containerId:testConfig.containerId,
 //       variant:{test:'data'}
-//     }).then(console.log('created!!!'))
+//     }).then(data=>{
+//       console.log(data.get())
+//       console.log('created!!!')
+//     })
 //   })
 // })
-
+  app.use('/api',appRouter)
   app.get('/',async (req,res,next)=>{
-    try {
-        const data=Utils.getParamsFromJson()
-        await data.then(testData=>{
-            res.send(testData)
-        })
+    res.send('welcome')
+    // try {
+    //     const data=Utils.getParamsFromJson()
+    //     await data.then(testData=>{
+    //         res.send(testData)
+    //     })
        
-      } catch (error) {
+    //   } catch (error) {
       
-      }
+    //   }
   })
  
 app.listen(PORT,function(){

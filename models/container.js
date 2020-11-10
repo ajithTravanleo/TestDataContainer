@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // conatiner hasMany testconfigs
       container.hasMany(models.testConfig)
+      container.hasMany(models.testVariant)
     }
   };
   container.init({

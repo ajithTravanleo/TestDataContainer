@@ -9,8 +9,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      testVariant.belongsTo(models.testConfig,{foreignKey: 'configId'})
-      testVariant.belongsTo(models.container)
+       testVariant.belongsTo(models.container,{foreignKey:'containerId'})
+       testVariant.belongsTo(models.testConfig,{foreignKey:'configId'})
+      // testVariant.belongsTo(models.testConfig,{foreignKey: 'configId'})
+      //testVariant.hasOne(models.container)
     }
   };
   testVariant.init({
