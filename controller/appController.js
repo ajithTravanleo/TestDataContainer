@@ -1,108 +1,210 @@
- const Container=require('../models').container
+const testconfig = require('../models/testconfig')
+
+const Container=require('../models').container
  const TestConfig=require('../models').testConfig
  const TestVariant=require('../models').testVariant
 
- async function getVariants(id){
-    TestVariant.findAll({
-        where:{configId:[id]},
-        attributes: {include:['variant']}
-    }).then(variants=>{
-        return  variants
-    }).catch(err=>console.log(err))
-     //return [{id:1,variant:'test'}]
-    //TestVariant.findAll()
- }
 
 exports.getcontainertests=async(req,res,next)=>{
     console.log(req.params)
     try{
-        Container.findAll({
+        Container.findOne({
             where:{cntId:[`${req.params.id}`]},
             attributes: {include:['id']}
-        }).then(id=> {
-            // id=[1]
-            if(id.length>0){
+        }).then(container=> {
+            if(container){
+                let id=container.id
                 TestConfig.findAll({
                     where:{containerId:id},
-                    attributes: {include:['name']}
+                    attributes: {exclude:['containerId','config','createdAt','updatedAt']}
                 }).then(testNames=>{
-                    console.log(testNames)
+                    //console.log(testNames)
                     res.json({tests:testNames})
-                }).catch(err=>{console.log('error occured',err)})
+                }).catch(err=>next(err))
             }else{
-                res.status(200).send({tests:[]})
+                res.send('invalid test id')
             }
-        }).catch(err=>console.log(err))
-
-    }catch{}
+            
+        }).catch(err=>next(err))
+      
+    }catch(err){
+        next(err);
+    }
     //next()
 }
 exports.gettestconfig=async(req,res,next)=>{
     console.log(req.params)
     try{
-        Container.findAll({
-            where:{cntId:[`${req.params.id}`]},
-            attributes: {include:['id']}
-        }).then(id=> {
-            id=[1]
-            if(id.length>0){
-                TestConfig.findAll({
-                    where:{containerId:id},
-                    attributes: {include:['config','testId','name','id']}
-                }).then(async (configs)=>{
-                    let testData={}
-                    testData['id']=configs.testId
-                    testData['name']=configs.name
-                    testData['params']=configs.config
-                    testData['variants']=await getVariants(configs.id)
-                    console.log(testData)
-                    res.send(testData)
-                }).catch(err=>{console.log('error occured',err)})
-            }else{
-                res.status(200).send({tests:[]})
-            }
-        }).catch(err=>console.log(err))
-
-    }catch{}
+        TestConfig.findAll({
+            where:{id:req.params.id},
+            include: [
+              {
+                model: TestVariant,
+                //attributes:['variant']
+              }
+            ]
+          }).then(testConfig => {
+             // const data=testConfig;
+             // console.log(data)
+              const resObj=testConfig.map(item=>{
+                  console.log(item.testVariant.get());
+                  const variant=item.testVariant.get();
+                return Object.assign(
+                    {},
+                    {
+                      id: item.id,
+                      name: item.name,
+                      params: item.config.params,
+                      variants: variant.variant.map(variant => {
+                       // console.log('variants')
+                        //tidy up the post data
+                        return Object.assign(
+                          {},
+                          {
+                           variant:variant.variant
+                           
+                          })
+                      })
+                    })
+                });
+                res.json(resObj)
+              next('success')
+          }).catch(err=>{next(err)})
+    }catch(err){
+        next(err);
+    }
+   
 }
 exports.ceateTest=async(req,res,next)=>{
     try{
-        const data=req.body.containerData;
-        //console.log(data)
-        const testExId=''
+        const bodyString= JSON.stringify(req.body)
+        const body=await JSON.parse(bodyString)
+        //console.log('create test called',body)
+        const data= await JSON.parse(body.containerData);
+       // console.log(data)
+        let testExId=''
+       //res.status(204).send('')
         if(data.length===0){
             res.send('invalid data')
         }else{
-            testExId=req.body.testId;
+            testExId=body.testId;
             Container.create({
-                name:req.body.testName,
-                cntId:req.body.testId,
+                name:body.testName,
+                cntId:body.testId,
                 userInfo:{
-                    userId:userData.id,
+                    userId:body.userId,
                    // userName:data.userinfo.user
                 }
-            }).then(container=>{
+            }).then(async (container)=>{
                 //let tests=data.tests
-                data.forEach(item=>{
-                    container.createTestConfig({
+                await data.forEach(async(item)=>{
+                  // console.log('item id',item.id)
+                     container.createTestConfig({
                         name:item.name,
                         testId:item.id,
                         config:{
                             params:item.params
                         }
                     }).then(response=>{
-                        console.log(response)
-                       
-                    }).catch(err=>{console.log(err)})
+                       // console.log(response)  
+                    }).catch(err=>next(err))
                 })
-            }).then(data=>{
-                res.status(200).send({msg:'saved successfully',respBody:testExId})
-            }).catch(err=>{console.log(err)})
-        }
-    }catch{
-
-    }
+                res.status(200).send({msg:'saved successfully',respBody:testExId}) 
+            }).catch(err=>next(err))
+        }  
+    }catch(err){next(err)}
 }
 exports.getcontainerdata=async(req,res,next)=>{
+   Container.findOne({
+            where:{cntId:[`${req.params.id}`]},
+            attributes: {include:['id']}
+        }).then(container=> {
+           // console.log('container id',container.id)
+            if(container){
+                TestConfig.findAll({
+                    where:{containerId:container.id},
+                    include: [
+                      {
+                        model: TestVariant,
+                        //attributes:['variant']
+                      }
+                    ]
+                  }).then(testConfig => {
+                     // const data=testConfig;
+                     // console.log(testConfig)
+                      const resObj=testConfig.map(item=>{
+                         // console.log(item.testVariant);
+                          if(item.testVariant)
+                          {
+                            const variant=item.testVariant.get();
+                            if(variant.variant.length>0){
+                              return Object.assign(
+                                  {},
+                                  {
+                                    id: item.testId,
+                                    name: item.name,
+                                    //params: item.config.params,
+                                    variants: variant.variant
+                                  })
+                            }else{
+                              return Object.assign(
+                                  {},
+                                  {
+                                    id: item.testId,
+                                    name: item.name,
+                                    variants: item.config.params,
+                                    //variants: variant.variant
+                                  })
+                            }
+                          }else{
+                            return Object.assign(
+                                {},
+                                {
+                                  id: item.testId,
+                                  name: item.name,
+                                  variants: item.config.params,
+                                  //variants: variant.variant
+                                })
+                          }
+                        });
+                        res.json(resObj)
+                  }).catch(err=>{next(err)})
 
+            }else{
+                res.status(400).send('invalid test id')
+            }
+            
+    }).catch(err=>{next(err)})
+}
+exports.updatetestconfig=async(req,res,next)=>{
+    TestConfig.findOne({
+        where:{id:req.params.id},
+        attributes:{include:['id']}
+    }).then(async (testconfig)=>{
+        if(testconfig){
+           const found= await TestVariant.count({
+                where:{id:testconfig.id},
+            });
+           if(found>0){
+            TestVariant.update({
+                variant:req.body.variants,
+               },{where:{
+                    configId:req.params.id
+               }
+            }).then(result=>{
+                console.log(result)
+                res.send('updated')
+            }).catch(err=>{next(err)})
+           }else{
+            testconfig.createTestVariant({
+                variant:req.body.variants
+            }).then(result=>{
+                res.send('created!')
+            }).catch(err=>{next(err)})
+           }
+        }else{
+            res.status(200).send('invalid test id')
+        }      
+        // testconfig.update({variant:req.body.variants})
+    }).catch(err=>{next(err)})
 }

@@ -12,14 +12,6 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      containerId:{
-        type: Sequelize.INTEGER,
-         allowNull: false,
-        // references: {         // User belongsTo Company 1:1
-        //   model: 'containers',
-        //   key: 'id'
-        // }
-      },
       variant: {
         type: Sequelize.JSONB
       },

@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   testConfig.init({
+    testId:DataTypes.STRING,
     name: DataTypes.STRING,
     config:DataTypes.JSONB
   }, {

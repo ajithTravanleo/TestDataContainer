@@ -6,8 +6,12 @@ const Utils=require('./utils/utils')
 const app=express()
 const appRouter=require('./routes/appRoute')
 app.use(cors())
-app.use(bodyParser.urlencoded({extended:false}))
+const multer=require('multer')
+const upload=multer()
+app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json())
+app.use(upload.array())
+
 // const Container=require('./models').container
 // const TestConfig=require('./models').testConfig
 // const TestVariant=require('./models').testVariant
@@ -40,7 +44,8 @@ app.use(bodyParser.json())
 //   })
 // })
   app.use('/api',appRouter)
-  app.get('/',async (req,res,next)=>{
+  app.post('/',async (req,res,next)=>{
+    console.log(req.body)
     res.send('welcome')
     // try {
     //     const data=Utils.getParamsFromJson()
