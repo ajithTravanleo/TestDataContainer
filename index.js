@@ -1,7 +1,7 @@
 const express=require('express')
 const bodyParser=require('body-parser')
 const cors=require('cors')
-const PORT=process.env.port||3402
+const PORT=process.env.port||3401
 const Utils=require('./utils/utils')
 const app=express()
 const appRouter=require('./routes/appRoute')
