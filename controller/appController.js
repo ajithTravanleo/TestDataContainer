@@ -44,7 +44,7 @@ exports.gettestconfig=async(req,res,next)=>{
             ]
           }).then(testConfig => {
              // const data=testConfig;
-             // console.log(data)
+             // console.log('test con',testConfig)
               const resObj=testConfig.map(item=>{
                   //console.log(item.testVariant.get());
                   if(item.testVariant)
@@ -68,12 +68,14 @@ exports.gettestconfig=async(req,res,next)=>{
                           })
                         })
                   }else{
+                      console.log('here')
                     return Object.assign(
                         {},
                         {
                           id: item.id,
                           name: item.name,
                           params: item.config.params,
+                          variants:[{variant:item.config.params}]
                         })
                   }
                 
@@ -124,7 +126,7 @@ exports.getcontainerdata=async(req,res,next)=>{
                                   {
                                     id: item.testId,
                                     name: item.name,
-                                    variants: item.config.params,
+                                    variants: [{variant:item.config.params}],
                                     //variants: variant.variant
                                   })
                             }
@@ -134,7 +136,7 @@ exports.getcontainerdata=async(req,res,next)=>{
                                 {
                                   id: item.testId,
                                   name: item.name,
-                                  variants: item.config.params,
+                                  variants:  [{variant:item.config.params}],
                                   //variants: variant.variant
                                 })
                           }
