@@ -1,8 +1,7 @@
-const testconfig = require('../models/testconfig')
 
 const Container=require('../models').container
- const TestConfig=require('../models').testConfig
- const TestVariant=require('../models').testVariant
+const TestConfig=require('../models').testConfig
+const TestVariant=require('../models').testVariant
 
 
 exports.getcontainertests=async(req,res,next)=>{
@@ -22,7 +21,7 @@ exports.getcontainertests=async(req,res,next)=>{
                     res.json({tests:testNames})
                 }).catch(err=>next(err))
             }else{
-                res.send('invalid test id')
+                res.status(400).send({msg:'invalid test id'})
             }
             
         }).catch(err=>next(err))
@@ -47,25 +46,37 @@ exports.gettestconfig=async(req,res,next)=>{
              // const data=testConfig;
              // console.log(data)
               const resObj=testConfig.map(item=>{
-                  console.log(item.testVariant.get());
-                  const variant=item.testVariant.get();
-                return Object.assign(
-                    {},
-                    {
-                      id: item.id,
-                      name: item.name,
-                      params: item.config.params,
-                      variants: variant.variant.map(variant => {
-                       // console.log('variants')
-                        //tidy up the post data
-                        return Object.assign(
-                          {},
-                          {
-                           variant:variant.variant
-                           
+                  //console.log(item.testVariant.get());
+                  if(item.testVariant)
+                  {
+                    const variant=item.testVariant.get();
+                    return Object.assign(
+                        {},
+                        {
+                          id: item.id,
+                          name: item.name,
+                          params: item.config.params,
+                          variants: variant.variant.map(variant => {
+                           // console.log('variants')
+                            //tidy up the post data
+                            return Object.assign(
+                              {},
+                              {
+                               variant:variant.variant
+                               
+                              })
                           })
-                      })
-                    })
+                        })
+                  }else{
+                    return Object.assign(
+                        {},
+                        {
+                          id: item.id,
+                          name: item.name,
+                          params: item.config.params,
+                        })
+                  }
+                
                 });
                 res.json(resObj)
               next('success')
@@ -74,45 +85,6 @@ exports.gettestconfig=async(req,res,next)=>{
         next(err);
     }
    
-}
-exports.ceateTest=async(req,res,next)=>{
-    try{
-        const bodyString= JSON.stringify(req.body)
-        const body=await JSON.parse(bodyString)
-        //console.log('create test called',body)
-        const data= await JSON.parse(body.containerData);
-       // console.log(data)
-        let testExId=''
-       //res.status(204).send('')
-        if(data.length===0){
-            res.send('invalid data')
-        }else{
-            testExId=body.testId;
-            Container.create({
-                name:body.testName,
-                cntId:body.testId,
-                userInfo:{
-                    userId:body.userId,
-                   // userName:data.userinfo.user
-                }
-            }).then(async (container)=>{
-                //let tests=data.tests
-                await data.forEach(async(item)=>{
-                  // console.log('item id',item.id)
-                     container.createTestConfig({
-                        name:item.name,
-                        testId:item.id,
-                        config:{
-                            params:item.params
-                        }
-                    }).then(response=>{
-                       // console.log(response)  
-                    }).catch(err=>next(err))
-                })
-                res.status(200).send({msg:'saved successfully',respBody:testExId}) 
-            }).catch(err=>next(err))
-        }  
-    }catch(err){next(err)}
 }
 exports.getcontainerdata=async(req,res,next)=>{
    Container.findOne({
@@ -171,7 +143,7 @@ exports.getcontainerdata=async(req,res,next)=>{
                   }).catch(err=>{next(err)})
 
             }else{
-                res.status(400).send('invalid test id')
+                res.status(400).send({msg:'invalid test id'})
             }
             
     }).catch(err=>{next(err)})
@@ -199,12 +171,59 @@ exports.updatetestconfig=async(req,res,next)=>{
             testconfig.createTestVariant({
                 variant:req.body.variants
             }).then(result=>{
-                res.send('created!')
+                res.send({msg:'created!'})
             }).catch(err=>{next(err)})
            }
         }else{
-            res.status(200).send('invalid test id')
+            res.status(200).send({msg:'invalid test id'})
         }      
         // testconfig.update({variant:req.body.variants})
     }).catch(err=>{next(err)})
+}
+exports.ceateTest=async(req,res,next)=>{
+    try{
+        const bodyString= JSON.stringify(req.body)
+        const body=await JSON.parse(bodyString)
+        //console.log('create test called',body)
+        const data= await JSON.parse(body.containerData);
+       // console.log(data)
+        let testExId=''
+       //res.status(204).send('')
+        if(data.length===0){
+            res.send('invalid data')
+        }else{
+            testExId=body.testId;
+            const found= await Container.count({
+                where:{cntId:testExId},
+            });
+            if(found>0){
+                res.status(400).send({msg:'Cannot create container.container already exists'})
+            }else{
+                Container.create({
+                    name:body.testName,
+                    cntId:body.testId,
+                    userInfo:{
+                        userId:body.userId,
+                       // userName:data.userinfo.user
+                    }
+                }).then(async (container)=>{
+                    //let tests=data.tests
+                    await data.forEach(async(item)=>{
+                      // console.log('item id',item.id)
+                         container.createTestConfig({
+                            name:item.name,
+                            testId:item.id,
+                            config:{
+                                params:item.params
+                            }
+                        }).then(response=>{
+                           // console.log(response)  
+                        }).catch(err=>next(err))
+                    })
+                    res.status(200).send({msg:'saved successfully',respBody:testExId}) 
+                }).catch(err=>next(err))
+            }
+            
+        }  
+    }catch(err){next(err)}
 }

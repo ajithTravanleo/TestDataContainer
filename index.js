@@ -1,7 +1,7 @@
 const express=require('express')
 const bodyParser=require('body-parser')
 const cors=require('cors')
-const PORT=process.env.port||3401
+const PORT=process.env.port||3402
 const Utils=require('./utils/utils')
 const app=express()
 const appRouter=require('./routes/appRoute')
@@ -11,41 +11,11 @@ const upload=multer()
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json())
 app.use(upload.array())
+require('dotenv').config()
 
-// const Container=require('./models').container
-// const TestConfig=require('./models').testConfig
-// const TestVariant=require('./models').testVariant
-
-// Container.create({
-//   name:'Test Container2',
-//   userInfo:{
-//     userId:'45494646464sdfdsd',
-//     userName:'Ajith'
-//   }
-// }).then(data=>{
-//   data.createTestConfig({
-//     name:'Test Config',
-//     config:{
-//       testname:'sample',
-//       params:{
-//         parms1:'a',
-//         parms2:'b',
-//       }
-//     }
-//   }).then(testConfig=>{
-//     console.log(testConfig.get())
-//    testConfig.createTestVariant({
-//       containerId:testConfig.containerId,
-//       variant:{test:'data'}
-//     }).then(data=>{
-//       console.log(data.get())
-//       console.log('created!!!')
-//     })
-//   })
-// })
   app.use('/api',appRouter)
-  app.post('/',async (req,res,next)=>{
-    console.log(req.body)
+  app.get('/',async (req,res,next)=>{
+    //console.log(req.body)
     res.send('welcome')
     // try {
     //     const data=Utils.getParamsFromJson()
