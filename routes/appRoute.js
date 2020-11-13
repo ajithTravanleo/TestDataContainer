@@ -7,4 +7,5 @@ router.get('/getcontainerdata/:id',appController.getcontainerdata)
 
 router.post('/createtestdata',appController.ceateTest)
 router.put('/updatetestconfig/:id',appController.updatetestconfig)
+router.get('/clearvariants',appController.clearvariants)
 module.exports = router

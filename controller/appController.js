@@ -50,25 +50,45 @@ exports.gettestconfig=async(req,res,next)=>{
                   if(item.testVariant)
                   {
                     const variant=item.testVariant.get();
-                    return Object.assign(
-                        {},
-                        {
-                          id: item.id,
-                          name: item.name,
-                          params: item.config.params,
-                          variants: variant.variant.map(variant => {
-                           // console.log('variants')
-                            //tidy up the post data
+                        if(variant.variant){
                             return Object.assign(
-                              {},
-                              {
-                               variant:variant.variant
+                                {},
+                                {
+                                id: item.id,
+                                name: item.name,
+                                params: item.config.params,
+                                variants: variant.variant
+                                })
+                        }else{
+                            return Object.assign(
+                                {},
+                                {
+                                id: item.testId,
+                                name: item.name,
+                                params: item.config.params,
+                                variants: [{variant:item.config.params}],
+                                //variants: variant.variant
+                                })
+                        }
+                    // return Object.assign(
+                    //     {},
+                    //     {
+                    //       id: item.id,
+                    //       name: item.name,
+                    //       params: item.config.params,
+                    //       variants: variant.variant.map(variant => {
+                    //        // console.log('variants')
+                    //         //tidy up the post data
+                    //         return Object.assign(
+                    //           {},
+                    //           {
+                    //            variant:variant.variant
                                
-                              })
-                          })
-                        })
+                    //           })
+                    //       })
+                    //     })
                   }else{
-                      console.log('here')
+                    console.log('here')
                     return Object.assign(
                         {},
                         {
@@ -151,14 +171,16 @@ exports.getcontainerdata=async(req,res,next)=>{
     }).catch(err=>{next(err)})
 }
 exports.updatetestconfig=async(req,res,next)=>{
+    console.log('updated',req.body)
     TestConfig.findOne({
         where:{id:req.params.id},
         attributes:{include:['id']}
     }).then(async (testconfig)=>{
         if(testconfig){
            const found= await TestVariant.count({
-                where:{id:testconfig.id},
+                where:{configId:testconfig.id},
             });
+            console.log(found)
            if(found>0){
             TestVariant.update({
                 variant:req.body.variants,
@@ -190,6 +212,7 @@ exports.ceateTest=async(req,res,next)=>{
         const data= await JSON.parse(body.containerData);
        // console.log(data)
         let testExId=''
+        let cid=''
        //res.status(204).send('')
         if(data.length===0){
             res.send('invalid data')
@@ -210,6 +233,7 @@ exports.ceateTest=async(req,res,next)=>{
                     }
                 }).then(async (container)=>{
                     //let tests=data.tests
+                    cid=container.id;
                     await data.forEach(async(item)=>{
                       // console.log('item id',item.id)
                          container.createTestConfig({
@@ -222,10 +246,21 @@ exports.ceateTest=async(req,res,next)=>{
                            // console.log(response)  
                         }).catch(err=>next(err))
                     })
-                    res.status(200).send({msg:'saved successfully',respBody:testExId}) 
+                    res.status(200).send({msg:'saved successfully',testId:testExId,containerId:cid}) 
                 }).catch(err=>next(err))
             }
             
         }  
     }catch(err){next(err)}
+}
+exports.clearvariants=async(req,res,next)=>{
+    try{
+        await TestVariant.destroy({
+            truncate: true
+          });
+          res.send('truncated')
+          next()
+    }catch{
+
+    }
 }
