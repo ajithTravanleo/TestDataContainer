@@ -151,7 +151,7 @@ exports.getcontainerdata=async(req,res,next)=>{
                                   {
                                     id: item.testId,
                                     name: item.name,
-                                    variants: [{variant:item.config.params}],
+                                    variants: [{checked:true,variant:item.config.params}],
                                     //variants: variant.variant
                                   })
                             }
@@ -161,7 +161,7 @@ exports.getcontainerdata=async(req,res,next)=>{
                                 {
                                   id: item.testId,
                                   name: item.name,
-                                  variants:  [{variant:item.config.params}],
+                                  variants:  [{checked:true,variant:item.config.params}],
                                   //variants: variant.variant
                                 })
                           }
