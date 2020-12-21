@@ -45,62 +45,67 @@ exports.gettestconfig=async(req,res,next)=>{
           }).then(testConfig => {
              // const data=testConfig;
              // console.log('test con',testConfig)
-              const resObj=testConfig.map(item=>{
-                  //console.log(item.testVariant.get());
-                  if(item.testVariant)
-                  {
-                    const variant=item.testVariant.get();
-                        if(variant.variant){
-                            return Object.assign(
-                                {},
-                                {
-                                id: item.id,
-                                name: item.name,
-                                params: item.config.params,
-                                variants: variant.variant
-                                })
-                        }else{
-                            return Object.assign(
-                                {},
-                                {
-                                id: item.testId,
-                                name: item.name,
-                                params: item.config.params,
-                                variants: [{variant:item.config.params}],
-                                //variants: variant.variant
-                                })
-                        }
-                    // return Object.assign(
-                    //     {},
-                    //     {
-                    //       id: item.id,
-                    //       name: item.name,
-                    //       params: item.config.params,
-                    //       variants: variant.variant.map(variant => {
-                    //        // console.log('variants')
-                    //         //tidy up the post data
-                    //         return Object.assign(
-                    //           {},
-                    //           {
-                    //            variant:variant.variant
-                               
-                    //           })
-                    //       })
-                    //     })
-                  }else{
-                    console.log('here')
-                    return Object.assign(
-                        {},
-                        {
-                          id: item.id,
-                          name: item.name,
-                          params: item.config.params,
-                          variants:[{variant:item.config.params}]
-                        })
-                  }
-                
-                });
-                res.json(resObj)
+             try{
+                const resObj=testConfig.map(item=>{
+                    //console.log(item.testVariant.get());
+                    if(item.testVariant)
+                    {
+                      const variant=item.testVariant.get();
+                          if(variant.variant){
+                              return Object.assign(
+                                  {},
+                                  {
+                                  id: item.id,
+                                  name: item.name,
+                                  params: item.config.params,
+                                  variants: variant.variant
+                                  })
+                          }else{
+                              return Object.assign(
+                                  {},
+                                  {
+                                  id: item.testId,
+                                  name: item.name,
+                                  params: item.config.params,
+                                  variants: [{checked:true,variant:item.config.params}],
+                                  //variants: variant.variant
+                                  })
+                          }
+                      // return Object.assign(
+                      //     {},
+                      //     {
+                      //       id: item.id,
+                      //       name: item.name,
+                      //       params: item.config.params,
+                      //       variants: variant.variant.map(variant => {
+                      //        // console.log('variants')
+                      //         //tidy up the post data
+                      //         return Object.assign(
+                      //           {},
+                      //           {
+                      //            variant:variant.variant
+                                 
+                      //           })
+                      //       })
+                      //     })
+                    }else{
+                      console.log('here')
+                      return Object.assign(
+                          {},
+                          {
+                            id: item.id,
+                            name: item.name,
+                            params: item.config.params,
+                            variants:[{checked:true,variant:item.config.params}]
+                          })
+                    }
+                  
+                  });
+                  res.json(resObj)
+             }catch(ex){
+                console.log(ex)
+             }
+             
               next('success')
           }).catch(err=>{next(err)})
     }catch(err){
